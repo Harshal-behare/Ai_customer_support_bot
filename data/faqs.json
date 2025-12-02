@@ -1,18 +1,82 @@
 [
   {
     "question": "How can I reset my password?",
-    "answer": "Click on 'Forgot password' on the login page and follow the instructions sent to your email."
+    "answer": "Click on 'Forgot password' on the login page and follow the instructions sent to your email. You'll receive a secure link to create a new password within 5 minutes."
   },
   {
     "question": "Where can I track my order?",
-    "answer": "Go to the Orders section of your account dashboard to see the latest tracking updates."
+    "answer": "Go to the Orders section of your account dashboard to see the latest tracking updates. You can also use the tracking number sent to your email with any major courier website."
   },
   {
     "question": "How do I request a refund?",
-    "answer": "You can submit a refund request from the Order Details page within 30 days of purchase."
+    "answer": "You can submit a refund request from the Order Details page within 30 days of purchase. Refunds are processed within 5-7 business days after we receive the returned item."
   },
   {
     "question": "Do you offer customer support on weekends?",
-    "answer": "Yes, our support team is available via chat and email on weekends from 9am to 6pm."
+    "answer": "Yes, our support team is available via chat and email on weekends from 9am to 6pm EST. For urgent issues outside these hours, you can submit a ticket and we'll respond first thing Monday morning."
+  },
+  {
+    "question": "What payment methods do you accept?",
+    "answer": "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and bank transfers for enterprise customers."
+  },
+  {
+    "question": "How long does shipping take?",
+    "answer": "Standard shipping takes 5-7 business days. Express shipping (2-3 days) and overnight shipping options are available at checkout for an additional fee."
+  },
+  {
+    "question": "Can I change my shipping address after placing an order?",
+    "answer": "Yes, you can change your shipping address within 2 hours of placing the order by contacting our support team. After that, the order is processed and cannot be modified."
+  },
+  {
+    "question": "How do I cancel my subscription?",
+    "answer": "Go to Account Settings > Subscriptions and click 'Cancel Subscription'. You'll have access until the end of your current billing period. No refunds for partial months."
+  },
+  {
+    "question": "What is your return policy?",
+    "answer": "We offer a 30-day return policy for most items in original condition with tags attached. Digital products and personalized items cannot be returned. Return shipping is free for defective items."
+  },
+  {
+    "question": "How do I update my billing information?",
+    "answer": "Navigate to Account Settings > Payment Methods. You can add, edit, or remove payment methods anytime. Changes take effect immediately for future transactions."
+  },
+  {
+    "question": "Do you ship internationally?",
+    "answer": "Yes, we ship to over 150 countries worldwide. International shipping costs are calculated at checkout based on destination and package weight. Delivery typically takes 10-21 business days."
+  },
+  {
+    "question": "How can I contact customer support?",
+    "answer": "You can reach us via live chat (bottom right corner), email at support@example.com, or phone at 1-800-SUPPORT (Mon-Fri 8am-8pm EST). Average response time is under 2 hours."
+  },
+  {
+    "question": "What if I receive a damaged or defective product?",
+    "answer": "Contact us immediately with photos of the damage. We'll send a replacement at no cost or issue a full refund including return shipping. Defective items can be returned within 90 days."
+  },
+  {
+    "question": "Can I use multiple discount codes on one order?",
+    "answer": "No, only one discount code can be applied per order. The system will automatically apply the code that gives you the best savings."
+  },
+  {
+    "question": "How do I create an account?",
+    "answer": "Click 'Sign Up' in the top right corner, enter your email and create a password. You'll receive a verification email. Click the link to activate your account and start shopping."
+  },
+  {
+    "question": "Is my payment information secure?",
+    "answer": "Yes, we use 256-bit SSL encryption and are PCI DSS compliant. We never store your full credit card details on our servers. All transactions are processed through secure payment gateways."
+  },
+  {
+    "question": "How do I apply a promo code?",
+    "answer": "Enter your promo code in the 'Discount Code' field at checkout and click 'Apply'. The discount will be reflected in your order total before you complete payment."
+  },
+  {
+    "question": "What happens if my package is lost?",
+    "answer": "If tracking shows no movement for 10 days, contact us. We'll file a claim with the carrier and either send a replacement or issue a full refund within 5-7 business days."
+  },
+  {
+    "question": "Can I modify my order after it's placed?",
+    "answer": "You can modify or cancel your order within 1 hour of placing it by contacting support. After that, it enters processing and cannot be changed. You can return items once received."
+  },
+  {
+    "question": "Do you offer gift wrapping?",
+    "answer": "Yes, gift wrapping is available for $5 per item during checkout. You can also include a personalized gift message at no additional cost."
   }
 ]

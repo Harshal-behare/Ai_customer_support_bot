@@ -246,6 +246,52 @@
         .error-message.active {
             display: block;
         }
+
+        .suggested-prompts {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .suggested-prompts-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .prompt-chip {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-right: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            outline: none;
+        }
+
+        .prompt-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .prompt-chip:active {
+            transform: translateY(0);
+        }
+
+        .prompt-chip.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .prompt-chip.tertiary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
     </style>
 </head>
 <body>
@@ -263,6 +309,16 @@
                     Hello! I'm your AI customer support assistant. How can I help you today?
                 </div>
             </div>
+        </div>
+
+        <div class="suggested-prompts" id="suggestedPrompts">
+            <div class="suggested-prompts-title">💡 Try asking:</div>
+            <button class="prompt-chip" data-prompt="How can I reset my password?">🔑 Reset Password</button>
+            <button class="prompt-chip" data-prompt="Where can I track my order?">📦 Track Order</button>
+            <button class="prompt-chip" data-prompt="How do I request a refund?">💰 Request Refund</button>
+            <button class="prompt-chip secondary" data-prompt="What payment methods do you accept?">💳 Payment Methods</button>
+            <button class="prompt-chip secondary" data-prompt="Do you ship internationally?">🌍 International Shipping</button>
+            <button class="prompt-chip tertiary" data-prompt="I want to speak to a manager">👤 Talk to Human</button>
         </div>
 
         <div class="chat-input-container">
@@ -426,6 +482,16 @@
             if (e.key === 'Enter') {
                 sendMessage();
             }
+        });
+
+        // Suggested prompts click handlers
+        document.querySelectorAll('.prompt-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const prompt = chip.getAttribute('data-prompt');
+                messageInput.value = prompt;
+                messageInput.focus();
+                sendMessage();
+            });
         });
 
         // Focus input on load

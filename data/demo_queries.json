@@ -1,0 +1,220 @@
+{
+  "description": "Sample customer queries for testing the AI Customer Support Bot",
+  "categories": {
+    "faq_matching": {
+      "description": "Queries that should match existing FAQs with high confidence",
+      "queries": [
+        "I forgot my password, how can I reset it?",
+        "Where is my order? I need to track it",
+        "I want my money back for this product",
+        "Are you available on Saturday?",
+        "What cards do you accept for payment?",
+        "How fast will my package arrive?",
+        "Can I change where my order is being shipped?",
+        "I need to cancel my monthly subscription",
+        "I want to return this item I bought",
+        "How do I change my credit card info?",
+        "Do you deliver to Canada?",
+        "How can I get in touch with support?",
+        "My product arrived broken, what should I do?",
+        "Can I stack multiple coupon codes?",
+        "How do I make an account on your site?",
+        "Is it safe to enter my credit card?",
+        "Where do I put my discount code?",
+        "My package hasn't arrived yet",
+        "Can I change my order? I just placed it",
+        "Do you do gift wrap?"
+      ]
+    },
+    "conversational": {
+      "description": "Natural conversational queries that need contextual responses",
+      "queries": [
+        "Hi, I need some help with my recent purchase",
+        "Hello, can you assist me?",
+        "I have a question about your service",
+        "Thanks for the help!",
+        "That was really helpful",
+        "I'm not sure I understand",
+        "Can you explain that in simpler terms?",
+        "What other options do I have?",
+        "Is there anything else I should know?",
+        "Perfect, that's exactly what I needed!"
+      ]
+    },
+    "escalation": {
+      "description": "Queries that should trigger escalation to human support",
+      "queries": [
+        "I need to speak to a manager",
+        "Transfer me to a human agent please",
+        "This bot is not helpful, get me a real person",
+        "I want to talk to someone on your team",
+        "Connect me with customer service representative",
+        "Escalate this issue to your supervisor",
+        "Can I speak with a live agent?",
+        "I need human assistance with this problem"
+      ]
+    },
+    "low_confidence": {
+      "description": "Queries that should result in low confidence and ticket creation",
+      "queries": [
+        "The website keeps crashing when I try to checkout",
+        "I was charged twice for the same order",
+        "My account is locked and I can't log in",
+        "There's a bug in your mobile app",
+        "I never received my refund from last month",
+        "Someone unauthorized accessed my account",
+        "The product I received is completely different from what I ordered",
+        "Your system keeps rejecting my valid credit card",
+        "I've been waiting for customer support for 3 hours",
+        "Why was my account suspended without explanation?"
+      ]
+    },
+    "complex_multi_turn": {
+      "description": "Queries designed for multi-turn conversations with context",
+      "queries": [
+        {
+          "turn": 1,
+          "message": "I want to return something",
+          "expected": "Should ask which item or provide return policy"
+        },
+        {
+          "turn": 2,
+          "message": "A shirt I bought 2 weeks ago",
+          "expected": "Should reference 30-day policy and ask for more details"
+        },
+        {
+          "turn": 3,
+          "message": "It doesn't fit properly",
+          "expected": "Should guide through return process"
+        },
+        {
+          "turn": 1,
+          "message": "How much is express shipping?",
+          "expected": "Should mention it's calculated at checkout"
+        },
+        {
+          "turn": 2,
+          "message": "What about international?",
+          "expected": "Should reference international shipping from previous context"
+        },
+        {
+          "turn": 1,
+          "message": "I can't log into my account",
+          "expected": "Should ask for more details or suggest password reset"
+        },
+        {
+          "turn": 2,
+          "message": "I already tried resetting my password",
+          "expected": "Should escalate or create ticket due to complexity"
+        }
+      ]
+    },
+    "edge_cases": {
+      "description": "Edge cases and unusual queries",
+      "queries": [
+        "",
+        "asjdklasjdklasjdkl",
+        "😀😀😀",
+        "What's the meaning of life?",
+        "Tell me a joke",
+        "Who won the world cup?",
+        "Write me a poem",
+        "What time is it?",
+        "How's the weather today?",
+        "Do you sell unicorns?"
+      ]
+    },
+    "intent_testing": {
+      "description": "Queries to test different intent detection",
+      "intents": {
+        "refund": [
+          "I want a refund for my order",
+          "Can I get my money back?",
+          "How do I request a refund?",
+          "Refund my purchase please"
+        ],
+        "shipping": [
+          "Where's my package?",
+          "How long for delivery?",
+          "Track my shipment",
+          "When will it arrive?"
+        ],
+        "account": [
+          "I can't access my account",
+          "Reset my password",
+          "Update my profile",
+          "Change my email address"
+        ],
+        "payment": [
+          "Payment failed",
+          "My card was declined",
+          "Update payment method",
+          "Billing issue"
+        ],
+        "product": [
+          "Tell me about this product",
+          "Is this item in stock?",
+          "Product specifications",
+          "Do you have this in blue?"
+        ]
+      }
+    }
+  },
+  "test_scenarios": [
+    {
+      "name": "Happy Path - FAQ Match",
+      "session_id": "test-001",
+      "messages": [
+        "How can I reset my password?",
+        "Thanks, that helped!"
+      ],
+      "expected_outcome": "High confidence FAQ match, no ticket created"
+    },
+    {
+      "name": "Escalation Flow",
+      "session_id": "test-002",
+      "messages": [
+        "I need help with my order",
+        "The item I received is damaged",
+        "I want to speak to a manager"
+      ],
+      "expected_outcome": "Ticket created on escalation intent"
+    },
+    {
+      "name": "Low Confidence Scenario",
+      "session_id": "test-003",
+      "messages": [
+        "Your website has a critical security vulnerability",
+        "I found a way to bypass authentication"
+      ],
+      "expected_outcome": "Low confidence, ticket created automatically"
+    },
+    {
+      "name": "Multi-Turn Context",
+      "session_id": "test-004",
+      "messages": [
+        "I want to return an item",
+        "I bought it 3 weeks ago",
+        "It's a pair of shoes",
+        "They're the wrong size"
+      ],
+      "expected_outcome": "Maintains context across turns, provides relevant guidance"
+    },
+    {
+      "name": "Mixed Intent Session",
+      "session_id": "test-005",
+      "messages": [
+        "How do I track my order?",
+        "Also, what's your refund policy?",
+        "And can I change my shipping address?"
+      ],
+      "expected_outcome": "Handles multiple different queries in same session"
+    }
+  ],
+  "performance_benchmarks": {
+    "faq_matching_threshold": 0.5,
+    "low_confidence_threshold": 0.4,
+    "expected_response_time_ms": 2000,
+    "context_retention_turns": 5
+  }
+}

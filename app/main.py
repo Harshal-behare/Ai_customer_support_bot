@@ -5,9 +5,6 @@ from fastapi.staticfiles import StaticFiles
 
 from . import db
 from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH, STATIC_DIR
-
-from . import db
-from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH
 from .faq import FAQService
 from .intent import detect_intent
 from .llm import generate_response
@@ -58,9 +55,6 @@ def chat_ui() -> HTMLResponse:
     if index_path.exists():
         return HTMLResponse(index_path.read_text(encoding="utf-8"))
     raise HTTPException(status_code=404, detail="UI not found")
-
-
-    }
 
 
 @app.get("/api/health", response_model=HealthResponse)

@@ -43,11 +43,6 @@ def _build_messages(user_message: str, context: str | None, history: Iterable[Ma
 
 
 def _fallback_response(user_message: str, context: str | None, history: Iterable[Mapping[str, str]] | None) -> str:
-def generate_response(
-    user_message: str,
-    context: str | None = None,
-    history: Iterable[Mapping[str, str]] | None = None,
-) -> str:
     context_section = f"\nContext: {context}" if context else ""
     history_section = f"\nPrevious conversation (most recent first):\n{_render_history(history)}" if history else ""
     return dedent(
