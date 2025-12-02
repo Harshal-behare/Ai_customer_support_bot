@@ -1,5 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
 
 from . import db
 from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH
@@ -27,11 +30,30 @@ app.add_middleware(
 
 faq_service = FAQService(FAQ_PATH)
 
+# Mount static files
+static_path = Path(__file__).parent.parent / "static"
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
 
 @app.on_event("startup")
 def startup_event() -> None:
     db.init_db()
     faq_service.load()
+
+
+@app.get("/")
+def root():
+    # Serve the chat UI if it exists
+    static_path = Path(__file__).parent.parent / "static" / "index.html"
+    if static_path.exists():
+        return FileResponse(static_path)
+    return {
+        "message": "AI Customer Support Bot API",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
 
 
 @app.get("/api/health", response_model=HealthResponse)
