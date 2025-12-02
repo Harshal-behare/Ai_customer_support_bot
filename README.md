@@ -22,6 +22,17 @@ uvicorn app.main:app --reload
 
 The API will be available at `http://127.0.0.1:8000`. Visit `/docs` for interactive Swagger documentation.
 
+### Running in GitHub Codespaces
+
+- The included `.devcontainer/devcontainer.json` uses the official Python 3.11 image and auto-installs dependencies via `pip install -r requirements.txt` after the container is created.
+- Start the API inside Codespaces with host binding so the forwarded port works:
+
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Codespaces will automatically forward port 8000; accept the prompt to open the forwarded URL and use `/docs` for the Swagger UI.
+
 ## Available Endpoints
 
 - `GET /api/health` — basic health check.
