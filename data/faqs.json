@@ -1,0 +1,18 @@
+[
+  {
+    "question": "How can I reset my password?",
+    "answer": "Click on 'Forgot password' on the login page and follow the instructions sent to your email."
+  },
+  {
+    "question": "Where can I track my order?",
+    "answer": "Go to the Orders section of your account dashboard to see the latest tracking updates."
+  },
+  {
+    "question": "How do I request a refund?",
+    "answer": "You can submit a refund request from the Order Details page within 30 days of purchase."
+  },
+  {
+    "question": "Do you offer customer support on weekends?",
+    "answer": "Yes, our support team is available via chat and email on weekends from 9am to 6pm."
+  }
+]
