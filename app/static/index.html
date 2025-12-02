@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Support Bot Playground</title>
+    <style>
+      :root {
+        font-family: Arial, sans-serif;
+        color: #0f172a;
+        background: #f8fafc;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header {
+        background: #0ea5e9;
+        color: white;
+        padding: 16px 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      main {
+        flex: 1;
+        padding: 24px;
+        max-width: 960px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      input, textarea, select, button {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        font-size: 14px;
+      }
+      button {
+        background: #0ea5e9;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .row {
+        display: grid;
+        gap: 12px;
+      }
+      .row.two {
+        grid-template-columns: 1fr 1fr;
+      }
+      .history {
+        max-height: 260px;
+        overflow-y: auto;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 10px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+      }
+      .history strong {
+        color: #67e8f9;
+      }
+      .pill {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 9999px;
+        background: #e2e8f0;
+        margin-right: 6px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>AI Customer Support Bot Playground</h1>
+      <p>Send a test message to <code>/api/chat</code> and view responses.</p>
+    </header>
+    <main>
+      <div class="card">
+        <div class="row two">
+          <div>
+            <label for="session">Session ID</label>
+            <input id="session" />
+          </div>
+          <div>
+            <label for="intent">Intent (auto-detected)</label>
+            <input id="intent" disabled />
+          </div>
+        </div>
+        <label for="message" style="margin-top: 12px">Your message</label>
+        <textarea id="message" rows="3" placeholder="Ask about refunds, orders, or account help"></textarea>
+        <button id="send" style="margin-top: 12px">Send</button>
+        <p id="status" style="margin-top: 8px; color: #0f172a;"></p>
+      </div>
+      <div class="card">
+        <h3>Latest Response</h3>
+        <div id="response" style="white-space: pre-wrap; margin-bottom: 8px"></div>
+        <div id="meta"></div>
+      </div>
+      <div class="card">
+        <h3>Recent History (server-side)</h3>
+        <div id="history" class="history"></div>
+      </div>
+    </main>
+    <script>
+      const sessionInput = document.getElementById("session");
+      const intentInput = document.getElementById("intent");
+      const messageInput = document.getElementById("message");
+      const sendBtn = document.getElementById("send");
+      const statusEl = document.getElementById("status");
+      const responseEl = document.getElementById("response");
+      const metaEl = document.getElementById("meta");
+      const historyEl = document.getElementById("history");
+
+      function randomSession() {
+        return `session-${Math.random().toString(36).slice(2, 10)}`;
+      }
+
+      function renderHistory(entries) {
+        if (!entries || entries.length === 0) {
+          historyEl.textContent = "No history for this session yet.";
+          return;
+        }
+        const lines = entries.map(
+          (item) =>
+            `\n\n▶️ ID: ${item.id}\n🕒 ${item.created_at}\n- User: ${item.user_message}\n- Bot: ${item.bot_response}`
+        );
+        historyEl.textContent = lines.join("\n");
+      }
+
+      async function sendMessage() {
+        const payload = {
+          message: messageInput.value.trim(),
+          session_id: sessionInput.value.trim() || randomSession(),
+        };
+        if (!payload.message) return;
+
+        sendBtn.disabled = true;
+        statusEl.textContent = "Sending...";
+        responseEl.textContent = "";
+        metaEl.textContent = "";
+
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.detail || "Request failed");
+          }
+
+          sessionInput.value = data.session_id || payload.session_id;
+          intentInput.value = data.intent;
+          responseEl.textContent = data.response;
+          metaEl.innerHTML = `
+            <span class="pill">Confidence: ${data.confidence}</span>
+            <span class="pill">Ticket: ${data.created_ticket ? "created" : "no"}</span>
+            ${data.ticket_id ? `<span class="pill">Ticket ID: ${data.ticket_id}</span>` : ""}
+            ${data.context_summary ? `<span class="pill">Context matched</span>` : ""}
+          `;
+
+          // Pull server history to display the conversation memory the backend is using
+          await refreshHistory(payload.session_id);
+          statusEl.textContent = "Message sent successfully.";
+        } catch (err) {
+          statusEl.textContent = `Error: ${err.message}`;
+        } finally {
+          sendBtn.disabled = false;
+        }
+      }
+
+      async function refreshHistory(sessionId) {
+        // Lightweight endpoint: reuse chat logs via tickets? Here we call chat history helper
+        try {
+          const res = await fetch(`/api/chat/history/${encodeURIComponent(sessionId)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          renderHistory(data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        sessionInput.value = randomSession();
+      });
+
+      sendBtn.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
