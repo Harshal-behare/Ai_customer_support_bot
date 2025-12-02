@@ -41,10 +41,3 @@ class TicketResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     message: str
-
-
-class ChatHistoryItem(BaseModel):
-    id: int
-    user_message: str
-    bot_response: str
-    created_at: str

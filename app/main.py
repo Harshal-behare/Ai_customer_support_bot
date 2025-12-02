@@ -1,17 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 
 from . import db
-from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH, STATIC_DIR
+from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH
 from .faq import FAQService
 from .intent import detect_intent
 from .llm import generate_response
 from .schemas import (
     ChatRequest,
     ChatResponse,
-    ChatHistoryItem,
     FeedbackRequest,
     FeedbackResponse,
     HealthResponse,
@@ -30,8 +27,6 @@ app.add_middleware(
 
 faq_service = FAQService(FAQ_PATH)
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
 
 @app.on_event("startup")
 def startup_event() -> None:
@@ -45,16 +40,7 @@ def root() -> dict[str, str]:
         "message": "AI Customer Support Bot is running",
         "docs": "/docs",
         "health": "/api/health",
-        "ui": "/ui",
     }
-
-
-@app.get("/ui", response_class=HTMLResponse)
-def chat_ui() -> HTMLResponse:
-    index_path = STATIC_DIR / "index.html"
-    if index_path.exists():
-        return HTMLResponse(index_path.read_text(encoding="utf-8"))
-    raise HTTPException(status_code=404, detail="UI not found")
 
 
 @app.get("/api/health", response_model=HealthResponse)
@@ -106,20 +92,6 @@ def chat_endpoint(payload: ChatRequest) -> ChatResponse:
         session_id=payload.session_id,
         context_summary=faq_answer,
     )
-
-
-@app.get("/api/chat/history/{session_id}", response_model=list[ChatHistoryItem])
-def chat_history(session_id: str, limit: int = 10) -> list[ChatHistoryItem]:
-    rows = db.recent_chat_history(session_id, limit=limit)
-    return [
-        ChatHistoryItem(
-            id=row["id"],
-            user_message=row["user_message"],
-            bot_response=row["bot_response"],
-            created_at=row["created_at"],
-        )
-        for row in rows
-    ]
 
 
 @app.post("/api/feedback", response_model=FeedbackResponse)
