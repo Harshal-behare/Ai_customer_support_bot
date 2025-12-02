@@ -127,6 +127,7 @@ def recent_chat_history(session_id: str, limit: int = 5) -> List[sqlite3.Row]:
         cursor = conn.execute(
             """
             SELECT id, user_message, bot_response, created_at
+            SELECT user_message, bot_response
             FROM chat_logs
             WHERE session_id = ?
             ORDER BY id DESC
