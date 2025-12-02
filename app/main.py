@@ -1,8 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pathlib import Path
 
 from . import db
 from .config import DEFAULT_LOW_CONFIDENCE_THRESHOLD, FAQ_PATH
@@ -30,11 +27,6 @@ app.add_middleware(
 
 faq_service = FAQService(FAQ_PATH)
 
-# Mount static files
-static_path = Path(__file__).parent.parent / "static"
-if static_path.exists():
-    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
-
 
 @app.on_event("startup")
 def startup_event() -> None:
@@ -43,16 +35,11 @@ def startup_event() -> None:
 
 
 @app.get("/")
-def root():
-    # Serve the chat UI if it exists
-    static_path = Path(__file__).parent.parent / "static" / "index.html"
-    if static_path.exists():
-        return FileResponse(static_path)
+def root() -> dict[str, str]:
     return {
-        "message": "AI Customer Support Bot API",
-        "version": "0.1.0",
+        "message": "AI Customer Support Bot is running",
         "docs": "/docs",
-        "health": "/api/health"
+        "health": "/api/health",
     }
 
 
@@ -65,15 +52,27 @@ def health_check() -> HealthResponse:
 def chat_endpoint(payload: ChatRequest) -> ChatResponse:
     intent, intent_score = detect_intent(payload.message)
     faq_answer, faq_score = faq_service.best_match(payload.message)
+    history_rows = db.recent_chat_history(payload.session_id, limit=5)
+    history_payload = [dict(row) for row in history_rows]
 
     if faq_answer and faq_score >= 0.5:
         bot_response = faq_answer
         confidence = faq_score
     else:
-        bot_response = generate_response(payload.message, context=faq_answer)
+        bot_response = generate_response(
+            payload.message,
+            context=faq_answer,
+            history=history_payload,
+        )
         confidence = max(intent_score, faq_score, 0.35)
 
-    chat_log_id = db.insert_chat_log(payload.message, bot_response, intent, confidence)
+    chat_log_id = db.insert_chat_log(
+        payload.message,
+        bot_response,
+        intent,
+        confidence,
+        payload.session_id,
+    )
 
     should_create_ticket = intent == "escalation" or confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
     created_ticket = False
@@ -90,6 +89,8 @@ def chat_endpoint(payload: ChatRequest) -> ChatResponse:
         created_ticket=created_ticket,
         ticket_id=ticket_id,
         chat_log_id=chat_log_id,
+        session_id=payload.session_id,
+        context_summary=faq_answer,
     )
 
 

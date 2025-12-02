@@ -27,10 +27,12 @@ def init_db() -> None:
                 bot_response TEXT NOT NULL,
                 intent TEXT,
                 confidence REAL,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                session_id TEXT NOT NULL DEFAULT 'default'
             );
             """
         )
+        ensure_chat_log_schema(conn)
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS tickets (
@@ -57,15 +59,27 @@ def init_db() -> None:
         )
 
 
-def insert_chat_log(user_message: str, bot_response: str, intent: Optional[str], confidence: float) -> int:
+def ensure_chat_log_schema(conn: sqlite3.Connection) -> None:
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(chat_logs)")}
+    if "session_id" not in columns:
+        conn.execute("ALTER TABLE chat_logs ADD COLUMN session_id TEXT NOT NULL DEFAULT 'default'")
+
+
+def insert_chat_log(
+    user_message: str,
+    bot_response: str,
+    intent: Optional[str],
+    confidence: float,
+    session_id: str,
+) -> int:
     created_at = datetime.utcnow().isoformat()
     with get_connection() as conn:
         cursor = conn.execute(
             """
-            INSERT INTO chat_logs (user_message, bot_response, intent, confidence, created_at)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO chat_logs (user_message, bot_response, intent, confidence, created_at, session_id)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (user_message, bot_response, intent, confidence, created_at),
+            (user_message, bot_response, intent, confidence, created_at, session_id),
         )
         return cursor.lastrowid
 
@@ -106,3 +120,18 @@ def insert_feedback(chat_log_id: int, rating: str, comment: Optional[str]) -> in
             (chat_log_id, rating, comment, created_at),
         )
         return cursor.lastrowid
+
+
+def recent_chat_history(session_id: str, limit: int = 5) -> List[sqlite3.Row]:
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """
+            SELECT user_message, bot_response
+            FROM chat_logs
+            WHERE session_id = ?
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (session_id, limit),
+        )
+        return cursor.fetchall()
