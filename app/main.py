@@ -52,15 +52,27 @@ def health_check() -> HealthResponse:
 def chat_endpoint(payload: ChatRequest) -> ChatResponse:
     intent, intent_score = detect_intent(payload.message)
     faq_answer, faq_score = faq_service.best_match(payload.message)
+    history_rows = db.recent_chat_history(payload.session_id, limit=5)
+    history_payload = [dict(row) for row in history_rows]
 
     if faq_answer and faq_score >= 0.5:
         bot_response = faq_answer
         confidence = faq_score
     else:
-        bot_response = generate_response(payload.message, context=faq_answer)
+        bot_response = generate_response(
+            payload.message,
+            context=faq_answer,
+            history=history_payload,
+        )
         confidence = max(intent_score, faq_score, 0.35)
 
-    chat_log_id = db.insert_chat_log(payload.message, bot_response, intent, confidence)
+    chat_log_id = db.insert_chat_log(
+        payload.message,
+        bot_response,
+        intent,
+        confidence,
+        payload.session_id,
+    )
 
     should_create_ticket = intent == "escalation" or confidence < DEFAULT_LOW_CONFIDENCE_THRESHOLD
     created_ticket = False
@@ -77,6 +89,8 @@ def chat_endpoint(payload: ChatRequest) -> ChatResponse:
         created_ticket=created_ticket,
         ticket_id=ticket_id,
         chat_log_id=chat_log_id,
+        session_id=payload.session_id,
+        context_summary=faq_answer,
     )
 
 

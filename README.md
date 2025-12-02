@@ -36,7 +36,7 @@ Codespaces will automatically forward port 8000; accept the prompt to open the f
 ## Available Endpoints
 
 - `GET /api/health` — basic health check.
-- `POST /api/chat` — process a user message, returning the detected intent, response, and optionally a ticket id.
+- `POST /api/chat` — process a user message, returning the detected intent, response, prior-context summary, and optionally a ticket id. Include `session_id` in the payload to maintain conversational memory across turns.
 - `POST /api/feedback` — capture 👍/👎 feedback for a chat response.
 - `GET /api/tickets` — view created tickets.
 
@@ -57,3 +57,33 @@ data/
 ```
 
 The backend currently uses an in-memory similarity search over FAQs and a placeholder LLM response generator. Ticket creation is triggered on low-confidence responses or explicit escalation intents, and all chat interactions are logged to SQLite for auditing.
+
+### Conversation memory & escalation simulation
+
+- Pass a `session_id` in `POST /api/chat` requests to thread related user messages together. The API will look up the five most recent exchanges in that session and include them in the generated response.
+- The response payload echoes the `session_id` and provides a `context_summary` when an FAQ match is used so frontends can surface why a particular answer was chosen.
+- Tickets are created automatically when intent is `escalation` **or** when the confidence score falls below the low-confidence threshold defined in `config.py`.
+
+Example chat request:
+
+```json
+{
+  "message": "I need help with a refund after 20 days",
+  "session_id": "demo-session-1"
+}
+```
+
+Example response fields:
+
+```json
+{
+  "response": "Thanks for your question!...",
+  "intent": "refund",
+  "confidence": 0.72,
+  "created_ticket": false,
+  "ticket_id": null,
+  "chat_log_id": 3,
+  "session_id": "demo-session-1",
+  "context_summary": "You can submit a refund request ..."
+}
+```
